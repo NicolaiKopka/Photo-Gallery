@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.HTML;
+import java.util.Collection;
 
 @Service
 @RequiredArgsConstructor
@@ -15,6 +16,9 @@ public class GalleryService {
     private final TagRepository tagRepository;
     public void getAllImages() {
 
+    }
+    public Collection<TagDbModel> getAllTags() {
+        return tagRepository.findAll();
     }
 
     public void addImageToDatabase() {
@@ -39,4 +43,5 @@ public class GalleryService {
             tagRepository.save(tagDbModel);
         });
     }
+
 }
