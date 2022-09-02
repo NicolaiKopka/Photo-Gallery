@@ -1,25 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import {BrowserRouter, Route, Routes} from "react-router-dom";
+import Gallery from "./MainGallery/Gallery"
+import Upload from "./Upload/Upload";
 
 function App() {
 
-    const [greeting, setGreeting] = useState('')
-
-    useEffect(() => {
-        fetch('/api/greeting', {
-            method: 'GET',
-            headers: {
-                'Accept': 'text/plain'
-            }
-        })
-            .then(response => response.text())
-            .then(text => setGreeting(text))
-            .catch(err => setGreeting('Da ist etwas schief gelaufen'));
-    }, []);
-
     return (
-        <div>
-            {greeting}
-        </div>
+        <BrowserRouter>
+            <Routes>
+                <Route path={"/"} element={<Gallery/>}/>
+                <Route path={"/upload"} element={<Upload/>}/>
+            </Routes>
+        </BrowserRouter>
     );
 }
 
