@@ -52,9 +52,7 @@ public class GalleryService {
             if(tagOptional.isPresent()) {
                 addTagsList.add(tagOptional.get());
             } else {
-                AddTagDTO addTagDTO = new AddTagDTO();
-                addTagDTO.setTagName(tagName);
-                addTagsList.add(addTagToDatabase(addTagDTO));
+                addTagsList.add(addTagToDatabase(tagName));
             }
 
         });
@@ -63,22 +61,22 @@ public class GalleryService {
         return imageRepository.save(imageDbModel);
     }
 
-    public TagDbModel addTagToDatabase(AddTagDTO addTagDTO) {
+    public TagDbModel addTagToDatabase(String tagName) {
 
-        if(addTagDTO.getTagName() == null) {
-            throw new IllegalArgumentException("Field must exists");
+        if(tagName == null) {
+            throw new IllegalArgumentException("Tag name has to exist");
         }
 
-        if(addTagDTO.getTagName().isBlank() || addTagDTO.getTagName().isEmpty()) {
-            throw new IllegalArgumentException("Cannot leave field empty");
+        if(tagName.isBlank() || tagName.isEmpty()) {
+            throw new IllegalArgumentException("No tag name present");
         }
 
-        if(tagRepository.findByTagName(addTagDTO.getTagName().toLowerCase()).isPresent()) {
+        if(tagRepository.findByTagName(tagName.toLowerCase()).isPresent()) {
             throw new IllegalArgumentException("Tag name already exists");
         }
 
         TagDbModel tagDbModel = new TagDbModel();
-        tagDbModel.setTagName(addTagDTO.getTagName().toLowerCase());
+        tagDbModel.setTagName(tagName.toLowerCase());
 
         return tagRepository.save(tagDbModel);
     }

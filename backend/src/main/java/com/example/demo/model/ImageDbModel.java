@@ -2,7 +2,9 @@ package com.example.demo.model;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sun.istack.NotNull;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
@@ -15,12 +17,13 @@ import java.util.Set;
 
 @Entity
 @Table(name = "images")
+@EqualsAndHashCode
 public class ImageDbModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
+    @NotNull
     @Column(name = "image_url")
     private String imageUrl;
     @JsonIgnore

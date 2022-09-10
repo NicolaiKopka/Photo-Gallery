@@ -61,10 +61,10 @@ public class GalleryController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
-    @PostMapping("/add/tag")
-    public ResponseEntity<?> addTagToDatabase(@RequestBody AddTagDTO addTagDTO) {
+    @PostMapping("/add/tag/{tagName}")
+    public ResponseEntity<?> addTagToDatabase(@PathVariable String tagName) {
         try {
-            TagDbModel tagDbModel = galleryService.addTagToDatabase(addTagDTO);
+            TagDbModel tagDbModel = galleryService.addTagToDatabase(tagName);
             return ResponseEntity.status(HttpStatus.CREATED).body(tagDbModel);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
