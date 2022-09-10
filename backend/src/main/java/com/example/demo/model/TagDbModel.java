@@ -1,14 +1,19 @@
 package com.example.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
+import lombok.ToString;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
 @Table(name = "tags")
-@Data
 public class TagDbModel {
 
     @Id
@@ -18,13 +23,31 @@ public class TagDbModel {
     @Column(name = "tag_name")
     private String tagName;
 
-    @ManyToMany
-    @JoinTable(
-            name = "image_ids",
-            joinColumns = @JoinColumn(name = "tag_id"),
-            inverseJoinColumns = @JoinColumn(name = "image_id")
-    )
-    private Set<ImageDbModel> imageIds = new HashSet<>();
+    @JsonIgnore
+    @ManyToMany(mappedBy = "imageTags")
+    private List<ImageDbModel> imageIds = new ArrayList<>();
 
+    public long getId() {
+        return id;
+    }
 
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getTagName() {
+        return tagName;
+    }
+
+    public void setTagName(String tagName) {
+        this.tagName = tagName;
+    }
+
+    public List<ImageDbModel> getImageIds() {
+        return imageIds;
+    }
+
+    public void setImageIds(List<ImageDbModel> imageIds) {
+        this.imageIds = imageIds;
+    }
 }

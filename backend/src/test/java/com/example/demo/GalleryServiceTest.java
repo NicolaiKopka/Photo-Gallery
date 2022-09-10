@@ -1,14 +1,12 @@
 package com.example.demo;
 
-import com.example.demo.model.AddTagDTO;
+import com.example.demo.DTOs.AddTagDTO;
 import com.example.demo.model.TagDbModel;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class GalleryServiceTest {
 

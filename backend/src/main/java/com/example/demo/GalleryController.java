@@ -1,18 +1,20 @@
 package com.example.demo;
 
+import com.example.demo.DTOs.AddImageDTO;
+import com.example.demo.DTOs.ImageByTagQueryDTO;
 import com.example.demo.DTOs.TagDbModelDTO;
-import com.example.demo.model.AddTagDTO;
+import com.example.demo.DTOs.AddTagDTO;
+import com.example.demo.model.ImageDbModel;
 import com.example.demo.model.TagDbModel;
 import lombok.RequiredArgsConstructor;
-import org.apache.catalina.loader.ResourceEntry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
+import javax.swing.text.html.HTML;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.NoSuchElementException;
 
 @CrossOrigin
 @RestController
@@ -23,36 +25,50 @@ public class GalleryController {
     private final GalleryService galleryService;
 
     @GetMapping("/all/images")
-    public void getAllImages() {
-        galleryService.getAllImages();
+    public ResponseEntity<Collection<ImageDbModel>> getAllImages() {
+        return ResponseEntity.ok(galleryService.getAllImages());
     }
 
     @GetMapping("/all/tags")
-    public ResponseEntity<Collection<TagDbModelDTO>> getAllTags() {
-        Collection<TagDbModel> allTags = galleryService.getAllTags();
-        List<TagDbModelDTO> allTagDTOs = allTags.stream().map(tag -> {
-            TagDbModelDTO tagDbModelDTO = new TagDbModelDTO();
-            tagDbModelDTO.setTagName(tag.getTagName());
-            tagDbModelDTO.setId(tag.getId());
-            return tagDbModelDTO;
-        }).toList();
-        return ResponseEntity.ok(allTagDTOs);
+    public ResponseEntity<Collection<TagDbModel>> getAllTags() {
+        return ResponseEntity.ok(galleryService.getAllTags());
     }
-
-    @PostMapping("/add/image")
-    public void addImageToDatabase() {
-        galleryService.addImageToDatabase();
-    }
-
-    @PostMapping("/add/tag")
-    public ResponseEntity<?> addTagToDatabase(@RequestBody AddTagDTO addTagDTO) {
+    @GetMapping("/all/tags/{image_id}")
+    public ResponseEntity<?> getAllTagsByImageId(@PathVariable Long image_id) {
         try {
-            galleryService.addTagToDatabase(addTagDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(addTagDTO);
+            List<TagDbModel> tagList = galleryService.getAllTagsByImageId(image_id);
+            return ResponseEntity.ok(tagList);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
 
+    }
+    @GetMapping("all/images/by-tags")
+    public ResponseEntity<?> getAllImagesByTags(@RequestBody ImageByTagQueryDTO imageByTagQueryDTO) {
+        try {
+            Collection<ImageDbModel> allImagesByTags = galleryService.getAllImagesByTags(imageByTagQueryDTO);
+            return ResponseEntity.ok(allImagesByTags);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Some tags are not existing");
+        }
+
+    }
+    @PostMapping("/add/image")
+    public ResponseEntity<?> addImageToDatabase(@RequestBody AddImageDTO addImageDTO) {
+        try {
+            return ResponseEntity.ok(galleryService.addImageToDatabase(addImageDTO));
+        } catch (IllegalArgumentException | NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+    @PostMapping("/add/tag")
+    public ResponseEntity<?> addTagToDatabase(@RequestBody AddTagDTO addTagDTO) {
+        try {
+            TagDbModel tagDbModel = galleryService.addTagToDatabase(addTagDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(tagDbModel);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
     }
 
 }
