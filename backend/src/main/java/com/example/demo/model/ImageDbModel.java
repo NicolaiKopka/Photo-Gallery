@@ -26,7 +26,7 @@ public class ImageDbModel {
     @NotNull
     @Column(name = "image_url")
     private String imageUrl;
-    @JsonIgnore
+
     @ManyToMany
     @JoinTable(
             name = "image_tag",
