@@ -25,25 +25,25 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Testcontainers
+//@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class PhotoGalleryTests {
 
 	@Autowired
 	private TestRestTemplate restTemplate;
 
-	@Container
-	public static PostgreSQLContainer container = new PostgreSQLContainer()
-			.withDatabaseName("postgresTest")
-			.withUsername("username")
-			.withPassword("password");
+//	@Container
+//	public static PostgreSQLContainer container = new PostgreSQLContainer()
+//			.withDatabaseName("postgresTest")
+//			.withUsername("username")
+//			.withPassword("password");
 
-	@DynamicPropertySource
-	static void properties(DynamicPropertyRegistry registry) {
-		registry.add("spring.datasource.url", container::getJdbcUrl);
-		registry.add("spring.datasource.password", container::getPassword);
-		registry.add("spring.datasource.username", container::getUsername);
-	}
+//	@DynamicPropertySource
+//	static void properties(DynamicPropertyRegistry registry) {
+//		registry.add("spring.datasource.url", container::getJdbcUrl);
+//		registry.add("spring.datasource.password", container::getPassword);
+//		registry.add("spring.datasource.username", container::getUsername);
+//	}
 	@Test
 	void contextLoads() {
 	}
