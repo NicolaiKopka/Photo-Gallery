@@ -43,7 +43,8 @@ public class GalleryController {
         }
 
     }
-    @GetMapping("all/images/by-tags")
+    // TODO should be GET request
+    @PostMapping("all/images/by-tags")
     public ResponseEntity<?> getAllImagesByTags(@RequestBody ImageByTagQueryDTO imageByTagQueryDTO) {
         try {
             Collection<ImageDbModel> allImagesByTags = galleryService.getAllImagesByTags(imageByTagQueryDTO);
