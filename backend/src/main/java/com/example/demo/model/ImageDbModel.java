@@ -3,9 +3,7 @@ package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.istack.NotNull;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -17,7 +15,9 @@ import java.util.Set;
 
 @Entity
 @Table(name = "images")
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ImageDbModel {
 
     @Id
@@ -39,7 +39,7 @@ public class ImageDbModel {
         imageTags.addAll(tags);
     }
 
-    public long getId() {
+    /*public long getId() {
         return id;
     }
 
@@ -61,5 +61,5 @@ public class ImageDbModel {
 
     public void setImageTags(List<TagDbModel> imageTags) {
         this.imageTags = imageTags;
-    }
+    }*/
 }

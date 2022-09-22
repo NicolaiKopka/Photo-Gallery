@@ -2,9 +2,7 @@ package com.example.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.istack.NotNull;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import lombok.*;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
@@ -16,7 +14,9 @@ import java.util.Set;
 
 @Entity
 @Table(name = "tags")
-@EqualsAndHashCode
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class TagDbModel {
 
     @Id
@@ -31,7 +31,7 @@ public class TagDbModel {
     @ManyToMany(mappedBy = "imageTags")
     private List<ImageDbModel> imageIds = new ArrayList<>();
 
-    public long getId() {
+    /*public long getId() {
         return id;
     }
 
@@ -53,5 +53,5 @@ public class TagDbModel {
 
     public void setImageIds(List<ImageDbModel> imageIds) {
         this.imageIds = imageIds;
-    }
+    }*/
 }

@@ -2,18 +2,19 @@ package com.example.demo;
 
 import com.example.demo.DTOs.AddImageDTO;
 import com.example.demo.DTOs.AddTagDTO;
+import com.example.demo.DTOs.EditImageDTO;
 import com.example.demo.DTOs.ImageByTagQueryDTO;
 import com.example.demo.model.ImageDbModel;
 import com.example.demo.model.TagDbModel;
 import org.assertj.core.api.Assertions;
 import org.checkerframework.checker.nullness.Opt;
 import org.checkerframework.checker.units.qual.A;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.testcontainers.shaded.org.yaml.snakeyaml.nodes.Tag;
 
 import java.util.*;
 
@@ -295,6 +296,144 @@ class GalleryServiceTest {
         Collection<ImageDbModel> actual = galleryService.getAllImagesByTags(imageByTagQueryDTO);
 
         Assertions.assertThat(actual).isEqualTo(expected);
+    }
+
+    // deleteImageById()
+
+    @Test
+    void shouldFailIfNoImageExistsOnDelete() {
+
+        ImageRepository imageRepository = Mockito.mock(ImageRepository.class);
+        Mockito.when(imageRepository.findById(1L)).thenReturn(Optional.empty());
+
+        TagRepository tagRepository = Mockito.mock(TagRepository.class);
+
+        GalleryService galleryService = new GalleryService(imageRepository, tagRepository);
+
+        Assertions.assertThatThrownBy(() -> galleryService.deleteImageById("1"))
+                .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void shouldDeleteImageById() {
+
+        ImageDbModel imageDbModel = new ImageDbModel();
+        imageDbModel.setImageUrl("test1.url");
+
+        ImageRepository imageRepository = Mockito.mock(ImageRepository.class);
+        Mockito.when(imageRepository.findById(1L)).thenReturn(Optional.of(imageDbModel));
+
+        TagRepository tagRepository = Mockito.mock(TagRepository.class);
+
+        GalleryService galleryService = new GalleryService(imageRepository, tagRepository);
+        galleryService.deleteImageById("1");
+
+        Mockito.verify(imageRepository).delete(imageDbModel);
+    }
+
+    // editImage()
+    @Test
+    void shouldFailOnRequestBodyAttributeMismatch() {
+        EditImageDTO editImageDTOIdNull = new EditImageDTO();
+        editImageDTOIdNull.setTagNames(new ArrayList<>(List.of("tag")));
+
+        EditImageDTO editImageDTOTagsNull = new EditImageDTO();
+        editImageDTOTagsNull.setId("1");
+
+        EditImageDTO editImageDTOIdEmpty = new EditImageDTO();
+        editImageDTOIdEmpty.setId("");
+        editImageDTOIdEmpty.setTagNames(new ArrayList<>(List.of("tag")));
+
+        EditImageDTO editImageDTOIdBlank = new EditImageDTO();
+        editImageDTOIdBlank.setId(" ");
+        editImageDTOIdBlank.setTagNames(new ArrayList<>(List.of("tag")));
+
+        EditImageDTO editImageDTOTagsEmpty = new EditImageDTO();
+        editImageDTOTagsEmpty.setTagNames(new ArrayList<>(Collections.emptyList()));
+        editImageDTOTagsEmpty.setId("1");
+
+        ImageRepository imageRepository = Mockito.mock(ImageRepository.class);
+        TagRepository tagRepository = Mockito.mock(TagRepository.class);
+
+        GalleryService galleryService = new GalleryService(imageRepository, tagRepository);
+
+        Assertions.assertThatThrownBy(() -> galleryService.editImage(editImageDTOIdNull))
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("All fields have to exist");
+
+        Assertions.assertThatThrownBy(() -> galleryService.editImage(editImageDTOTagsNull))
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("All fields have to exist");
+
+        Assertions.assertThatThrownBy(() -> galleryService.editImage(editImageDTOIdEmpty))
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("Cannot leave field empty");
+
+        Assertions.assertThatThrownBy(() -> galleryService.editImage(editImageDTOIdBlank))
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("Cannot leave field empty");
+
+        Assertions.assertThatThrownBy(() -> galleryService.editImage(editImageDTOTagsEmpty))
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("Cannot leave field empty");
+    }
+
+    @Test
+    void shouldFailIfNoImageExistsOnEdit() {
+
+        EditImageDTO editImageDTO = new EditImageDTO();
+        editImageDTO.setId("1");
+        editImageDTO.setTagNames(new ArrayList<>(List.of("tag")));
+
+        ImageRepository imageRepository = Mockito.mock(ImageRepository.class);
+        Mockito.when(imageRepository.findById(1L)).thenReturn(Optional.empty());
+
+        TagRepository tagRepository = Mockito.mock(TagRepository.class);
+
+        GalleryService galleryService = new GalleryService(imageRepository, tagRepository);
+
+        Assertions.assertThatThrownBy(() -> galleryService.editImage(editImageDTO))
+                .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void shouldEditAndUpdateImage() {
+
+        EditImageDTO editImageDTO = new EditImageDTO();
+        editImageDTO.setId("1");
+        editImageDTO.setTagNames(new ArrayList<>(List.of("Car", "Mountain", "Super", "Best")));
+
+        TagDbModel tagCar = new TagDbModel();
+        tagCar.setTagName("car");
+
+        TagDbModel tagMountain = new TagDbModel();
+        tagMountain.setTagName("mountain");
+
+        TagDbModel tagSuper = new TagDbModel();
+        tagSuper.setTagName("super");
+
+        TagDbModel tagBest = new TagDbModel();
+        tagBest.setTagName("best");
+
+        ImageDbModel imageDbModel = new ImageDbModel();
+        imageDbModel.setId(1L);
+        imageDbModel.setImageUrl("test.url");
+        imageDbModel.setImageTags(new ArrayList<>(List.of(tagCar, tagMountain)));
+
+        ImageDbModel expectedImage = new ImageDbModel();
+        expectedImage.setId(1L);
+        expectedImage.setImageUrl("test.url");
+        expectedImage.setImageTags(new ArrayList<>(List.of(tagCar, tagMountain, tagSuper, tagBest)));
+
+        ImageRepository imageRepository = Mockito.mock(ImageRepository.class);
+        Mockito.when(imageRepository.findById(1L)).thenReturn(Optional.of(imageDbModel));
+
+        TagRepository tagRepository = Mockito.mock(TagRepository.class);
+        Mockito.when(tagRepository.findByTagName("car")).thenReturn(Optional.of(tagCar));
+        Mockito.when(tagRepository.findByTagName("mountain")).thenReturn(Optional.of(tagMountain));
+        Mockito.when(tagRepository.findByTagName("super")).thenReturn(Optional.of(tagSuper));
+        Mockito.when(tagRepository.findByTagName("best")).thenReturn(Optional.empty());
+        Mockito.when(tagRepository.save(tagBest)).thenReturn(tagBest);
+
+        GalleryService galleryService = new GalleryService(imageRepository, tagRepository);
+        galleryService.editImage(editImageDTO);
+
+        Mockito.verify(imageRepository).save(expectedImage);
     }
 
 

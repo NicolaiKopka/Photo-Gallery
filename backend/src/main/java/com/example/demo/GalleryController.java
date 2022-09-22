@@ -1,9 +1,6 @@
 package com.example.demo;
 
-import com.example.demo.DTOs.AddImageDTO;
-import com.example.demo.DTOs.ImageByTagQueryDTO;
-import com.example.demo.DTOs.TagDbModelDTO;
-import com.example.demo.DTOs.AddTagDTO;
+import com.example.demo.DTOs.*;
 import com.example.demo.model.ImageDbModel;
 import com.example.demo.model.TagDbModel;
 import lombok.RequiredArgsConstructor;
@@ -70,6 +67,27 @@ public class GalleryController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
+
+    @PutMapping("/edit/image")
+    public ResponseEntity<?> editImage(@RequestBody EditImageDTO editImageDTO) {
+        try {
+            return ResponseEntity.ok(galleryService.editImage(editImageDTO));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No Image found");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteImageById(@PathVariable String id) {
+        try {
+            return ResponseEntity.ok(galleryService.deleteImageById(id));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No Image found");
+        }
+
     }
 
 }

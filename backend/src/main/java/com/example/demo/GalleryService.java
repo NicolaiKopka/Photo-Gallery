@@ -2,6 +2,7 @@ package com.example.demo;
 
 import com.example.demo.DTOs.AddImageDTO;
 import com.example.demo.DTOs.AddTagDTO;
+import com.example.demo.DTOs.EditImageDTO;
 import com.example.demo.DTOs.ImageByTagQueryDTO;
 import com.example.demo.model.ImageDbModel;
 import com.example.demo.model.TagDbModel;
@@ -45,17 +46,7 @@ public class GalleryService {
         ImageDbModel imageDbModel = new ImageDbModel();
         imageDbModel.setImageUrl(addImageDTO.getImageUrl());
 
-        List<TagDbModel> addTagsList = new ArrayList<>();
-
-        addImageDTO.getTagNames().forEach(tagName -> {
-            Optional<TagDbModel> tagOptional = tagRepository.findByTagName(tagName.toLowerCase());
-            if(tagOptional.isPresent()) {
-                addTagsList.add(tagOptional.get());
-            } else {
-                addTagsList.add(addTagToDatabase(tagName));
-            }
-
-        });
+        List<TagDbModel> addTagsList = findOrCreateTags(addImageDTO.getTagNames());
 
         imageDbModel.addImageTags(addTagsList);
         return imageRepository.save(imageDbModel);
@@ -99,5 +90,51 @@ public class GalleryService {
         });
 
         return imageRepository.findByImageTagsIn(allTags, (long) allTags.size());
+    }
+
+    public ImageDbModel deleteImageById(String id) {
+        long currentId = Long.parseLong(id);
+        ImageDbModel currentImage = imageRepository.findById(currentId).orElseThrow();
+        imageRepository.delete(currentImage);
+        return currentImage;
+    }
+
+    public ImageDbModel editImage(EditImageDTO editImageDTO) {
+
+        if(editImageDTO.getId() == null || editImageDTO.getTagNames() == null) {
+            throw new IllegalArgumentException("All fields have to exist");
+        }
+
+        if(editImageDTO.getId().isEmpty() || editImageDTO.getId().isBlank() || editImageDTO.getTagNames().isEmpty()) {
+            throw new IllegalArgumentException("Cannot leave field empty");
+        }
+
+        String id = editImageDTO.getId();
+        long currentId = Long.parseLong(id);
+        ImageDbModel currentImage = imageRepository.findById(currentId).orElseThrow();
+
+        List<TagDbModel> addTagsList = findOrCreateTags(editImageDTO.getTagNames());
+
+        List<TagDbModel> imageTags = currentImage.getImageTags();
+        imageTags.forEach(addTagsList::remove);
+
+        currentImage.addImageTags(addTagsList);
+
+        return imageRepository.save(currentImage);
+    }
+
+    private List<TagDbModel> findOrCreateTags(List<String> tagList) {
+        List<TagDbModel> addTagsList = new ArrayList<>();
+
+        tagList.forEach(tagName -> {
+            Optional<TagDbModel> tagOptional = tagRepository.findByTagName(tagName.toLowerCase());
+            if(tagOptional.isPresent()) {
+                addTagsList.add(tagOptional.get());
+            } else {
+                addTagsList.add(addTagToDatabase(tagName));
+            }
+        });
+
+        return addTagsList;
     }
 }

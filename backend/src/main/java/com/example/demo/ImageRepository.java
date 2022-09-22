@@ -15,9 +15,10 @@ import java.util.Optional;
 import java.util.Set;
 
 @Repository
-public interface ImageRepository extends JpaRepository<ImageDbModel, Integer> {
+public interface ImageRepository extends JpaRepository<ImageDbModel, Long> {
 
     Optional<ImageDbModel> findByImageUrl(String url);
+
     @Query("select i from ImageDbModel i join i.imageTags t " +
             "where t.id in :imageTags group by i.id having count(i.id) = :tagCount")
     List<ImageDbModel> findByImageTagsIn(@Param("imageTags") Collection<Long> imageTags
