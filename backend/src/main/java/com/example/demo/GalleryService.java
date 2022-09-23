@@ -115,10 +115,7 @@ public class GalleryService {
 
         List<TagDbModel> addTagsList = findOrCreateTags(editImageDTO.getTagNames());
 
-        List<TagDbModel> imageTags = currentImage.getImageTags();
-        imageTags.forEach(addTagsList::remove);
-
-        currentImage.addImageTags(addTagsList);
+        currentImage.setImageTags(addTagsList);
 
         return imageRepository.save(currentImage);
     }

@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.DTOs.AddImageDTO;
+import com.example.demo.DTOs.EditImageDTO;
 import com.example.demo.DTOs.ImageByTagQueryDTO;
 import com.example.demo.model.ImageDbModel;
 import com.example.demo.model.TagDbModel;
@@ -156,7 +157,44 @@ class PhotoGalleryTests {
 		Assertions.assertThat(tag2Response[2].getTagName()).isEqualTo("car");
 	}
 
+	@Test
+	@Order(3)
+	void userEditsAndDeletesImage() {
 
+		//setup image to edit and delete
+		ImageDbModel[] allImages = restTemplate.getForObject("/api/photo-gallery/all/images", ImageDbModel[].class);
+		long currentImageId = allImages[0].getId();
 
+		// edit image
+		EditImageDTO editImageDTO = new EditImageDTO();
+		editImageDTO.setId(String.valueOf(currentImageId));
+		editImageDTO.setTagNames(List.of("car", "super", "mumbai"));
 
+		ResponseEntity<ImageDbModel> editResponse = restTemplate.exchange(
+				"/api/photo-gallery/edit/image",
+				HttpMethod.PUT,
+				new HttpEntity<>(editImageDTO, new HttpHeaders()),
+				ImageDbModel.class);
+
+		Assertions.assertThat(editResponse.getBody().getImageUrl()).isEqualTo("test1.url");
+
+		ImageDbModel[] allImagesAfterEdit = restTemplate.getForObject("/api/photo-gallery/all/images", ImageDbModel[].class);
+		List<TagDbModel> editedImageTags = allImagesAfterEdit[0].getImageTags();
+		Assertions.assertThat(editedImageTags.get(0).getTagName()).isEqualTo("car");
+		Assertions.assertThat(editedImageTags.get(1).getTagName()).isEqualTo("super");
+		Assertions.assertThat(editedImageTags.get(2).getTagName()).isEqualTo("mumbai");
+
+		// test for new tag mumbai
+		TagDbModel[] allTagsAfterEdit = restTemplate.getForObject("/api/photo-gallery/all/tags", TagDbModel[].class);
+		Assertions.assertThat(allTagsAfterEdit.length).isEqualTo(5);
+		Assertions.assertThat(allTagsAfterEdit[4].getTagName()).isEqualTo("mumbai");
+
+		// delete image
+		restTemplate.delete("/api/photo-gallery/delete/" + currentImageId);
+
+		ImageDbModel[] allImagesAfterDelete = restTemplate.getForObject("/api/photo-gallery/all/images", ImageDbModel[].class);
+		Assertions.assertThat(allImagesAfterDelete.length).isEqualTo(1);
+		Assertions.assertThat(allImagesAfterDelete[0].getImageUrl()).isEqualTo("test2.url");
+
+	}
 }
